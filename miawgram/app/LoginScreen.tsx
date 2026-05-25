@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import styles from "./LoginScreen.module.css";
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+import { supabase } from "@/lib/supabase";
 
 interface FormState {
   correo: string;
@@ -21,28 +19,13 @@ interface Toast {
   type: "success" | "error";
 }
 
-async function signInUser(correo: string, password: string) {
-  const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    },
-    body: JSON.stringify({ email: correo, password }),
-  });
-  const data = await res.json();
-  console.log("Supabase response:", res.status, data);
-  if (!res.ok) throw new Error(data.error_description || data.msg || "Credenciales incorrectas");
-  return data;
-}
-
 interface Props {
   onGoRegister?: () => void;
-  onLogin?: () => void;
 }
 
-export default function LoginScreen({ onGoRegister, onLogin}: Props) {
+export default function LoginScreen({
+  onGoRegister,
+}: Props) {
   const [form, setForm] = useState<FormState>({ correo: "", password: "" });
   const [errors, setErrors] = useState<FormErrors>({});
   const [focused, setFocused] = useState<Partial<Record<keyof FormState, boolean>>>({});
@@ -71,21 +54,41 @@ export default function LoginScreen({ onGoRegister, onLogin}: Props) {
     return e;
   };
 
-  const handleSubmit = async () => {
-    const v = validate();
-    if (Object.keys(v).length) { setErrors(v); return; }
-    setSubmitting(true);
-    try {
-      await signInUser(form.correo, form.password);
-      showToast("¡Bienvenido/a de nuevo! 🐱", "success");
-      setTimeout(() => onLogin?.(), 1000);
-      // TODO: router.push("/feed")
-    } catch (err) {
-      showToast((err as Error).message, "error");
-    } finally {
-      setSubmitting(false);
+ const handleSubmit = async () => {
+  const v = validate();
+
+  if (Object.keys(v).length) {
+    setErrors(v);
+    return;
+  }
+
+  setSubmitting(true);
+
+  try {
+    const { error } =
+      await supabase.auth.signInWithPassword({
+        email: form.correo,
+        password: form.password,
+      });
+
+    if (error) {
+      throw error;
     }
-  };
+
+    showToast(
+      "¡Bienvenido/a de nuevo! 🐱",
+      "success"
+    );
+
+  } catch (err) {
+    showToast(
+      (err as Error).message,
+      "error"
+    );
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const inputClass = (field: keyof FormState) =>
     [styles.input, focused[field] ? styles.inputFocused : "", errors[field] ? styles.inputError : ""]
