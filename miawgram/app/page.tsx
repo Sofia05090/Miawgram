@@ -65,7 +65,7 @@ export default function HomePage() {
       return (
         <LoginScreen
           onGoRegister={() => setScreen("register")}
-          onLogin={() => setIsAuthenticated(true)} // pasa esto si tu LoginScreen lo soporta
+          onLogin={() => setIsAuthenticated(true)} 
         />
       );
     }

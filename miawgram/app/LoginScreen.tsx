@@ -32,15 +32,17 @@ async function signInUser(correo: string, password: string) {
     body: JSON.stringify({ email: correo, password }),
   });
   const data = await res.json();
+  console.log("Supabase response:", res.status, data);
   if (!res.ok) throw new Error(data.error_description || data.msg || "Credenciales incorrectas");
   return data;
 }
 
 interface Props {
   onGoRegister?: () => void;
+  onLogin?: () => void;
 }
 
-export default function LoginScreen({ onGoRegister }: Props) {
+export default function LoginScreen({ onGoRegister, onLogin}: Props) {
   const [form, setForm] = useState<FormState>({ correo: "", password: "" });
   const [errors, setErrors] = useState<FormErrors>({});
   const [focused, setFocused] = useState<Partial<Record<keyof FormState, boolean>>>({});
@@ -52,7 +54,7 @@ export default function LoginScreen({ onGoRegister }: Props) {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 4500);
   };
-
+ 
   const set = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((p) => ({ ...p, [field]: e.target.value }));
     setErrors((p) => ({ ...p, [field]: undefined }));
@@ -76,6 +78,7 @@ export default function LoginScreen({ onGoRegister }: Props) {
     try {
       await signInUser(form.correo, form.password);
       showToast("¡Bienvenido/a de nuevo! 🐱", "success");
+      setTimeout(() => onLogin?.(), 1000);
       // TODO: router.push("/feed")
     } catch (err) {
       showToast((err as Error).message, "error");

@@ -14,13 +14,7 @@ interface FormState {
   fecha_cumple: string;
 }
 
-interface FormErrors {
-  nombre?: string;
-  nickname?: string;
-  correo?: string;
-  password?: string;
-  telefono?: string;
-}
+type FormErrors = Partial<Record<keyof FormState, string>>;
 
 interface Toast {
   msg: string;
@@ -58,7 +52,7 @@ function CatGrid({
           <div className={styles.catGrid}>
             {cats.map((cat, i) => (
               <div
-                key={cat.id_imagen}
+                key={cat.id_imagen ?? `cat-${i}`}
                 onClick={() => onSelect(cat)}
                 className={`${styles.catTile} ${selected?.id_imagen === cat.id_imagen ? styles.catTileSelected : ""}`}
               >
@@ -78,8 +72,11 @@ function CatGrid({
 
         {!loading && (
           <div className={styles.catOverlay}>
-            {selected ? `Seleccionado: ${selected.id_imagen.slice(0, 10)}…` : "Toca una foto para elegirla"}
-          </div>
+            {selected?.id_imagen
+              ? `Seleccionado: ${selected.id_imagen.slice(0, 10)}…`
+              : "Toca una foto para elegirla"
+            }
+         </div>
         )}
       </div>
     </div>
