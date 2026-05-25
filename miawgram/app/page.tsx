@@ -49,6 +49,8 @@ export default function HomePage() {
     "Posando para la foto 📸",
     "Esperando comida 🍖",
     "Gatito explorador 🌎",
+    "Odio los lunes 😾",
+    "Devorador de almas 👻",
   ];
 
   if (loading) {

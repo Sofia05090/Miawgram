@@ -49,6 +49,8 @@ export default function HomePage() {
     "Posando para la foto 📸",
     "Esperando comida 🍖",
     "Gatito explorador 🌎",
+    "Odio los lunes 😾",
+    "Devorador de almas 👻",
   ];
 
   if (loading) {
@@ -64,7 +66,7 @@ export default function HomePage() {
       {/* HEADER */}
       <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 border-b border-zinc-800 bg-black">
         <h1 className="text-2xl font-bold tracking-wide">
-          Catstagram 🐱
+          Miawgram 🐱
         </h1>
 
         <div className="flex gap-4">
