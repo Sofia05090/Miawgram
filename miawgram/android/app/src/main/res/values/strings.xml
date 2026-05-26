@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Miawgram</string>
+    <string name="title_activity_main">Miawgram</string>
+    <string name="package_name">com.miawgram.app</string>
+    <string name="custom_url_scheme">com.miawgram.app</string>
+</resources>
