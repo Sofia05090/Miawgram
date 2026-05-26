@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Heart, MessageCircle, Send, Bookmark } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+
+import {
+  Heart,
+  MessageCircle,
+  Send,
+  Bookmark,
+  RefreshCw,
+  LogOut,
+} from "lucide-react";
 
 interface CatPost {
   id: string;
@@ -11,50 +20,71 @@ interface CatPost {
   description: string;
 }
 
+const descriptions = [
+  "Durmiendo todo el día 😴",
+  "Modo cazador activado 🐈",
+  "Demasiado adorable ❤️",
+  "El rey de la casa 👑",
+  "Posando para la foto 📸",
+  "Esperando comida 🍖",
+  "Gatito explorador 🌎",
+];
+
+
 export default function HomePage() {
   const [posts, setPosts] = useState<CatPost[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const generatePosts = async () => {
-      try {
-        // Crear varias publicaciones falsas usando la API de Cataas
-        const newPosts: CatPost[] = Array.from({ length: 10 }).map(
-          (_, index) => ({
-            id: `${index}`,
-            imageUrl: `https://cataas.com/cat?random=${index}`,
-            likes: Math.floor(Math.random() * 5000) + 100,
-            description: descriptions[
+  // GENERAR POSTS
+  const generatePosts = async () => {
+    setLoading(true);
+
+    try {
+      const randomSeed = Date.now();
+
+      const newPosts: CatPost[] = Array.from({ length: 10 }).map(
+        (_, index) => ({
+          id: `${randomSeed}-${index}`,
+          imageUrl: `https://cataas.com/cat?random=${randomSeed}-${index}`,
+          likes: Math.floor(Math.random() * 5000) + 100,
+          description:
+            descriptions[
               Math.floor(Math.random() * descriptions.length)
             ],
-          })
-        );
+        })
+      );
 
-        setPosts(newPosts);
-      } catch (error) {
-        console.error("Error cargando gatos:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      setPosts(newPosts);
+    } catch (error) {
+      console.error("Error cargando gatos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // CERRAR SESIÓN
+  const handleLogout = async () => {
+  const { error } =
+    await supabase.auth.signOut();
+
+  if (error) {
+    console.error(error.message);
+    return;
+  }
+
+  window.location.reload();
+};
+
+  useEffect(() => {
     generatePosts();
   }, []);
-
-  const descriptions = [
-    "Durmiendo todo el día 😴",
-    "Modo cazador activado 🐈",
-    "Demasiado adorable ❤️",
-    "El rey de la casa 👑",
-    "Posando para la foto 📸",
-    "Esperando comida 🍖",
-    "Gatito explorador 🌎",
-  ];
 
   if (loading) {
     return (
       <main className="flex items-center justify-center min-h-screen bg-black text-white">
-        <p className="text-lg animate-pulse">Cargando gatos...</p>
+        <p className="text-lg animate-pulse">
+          Cargando gatos...
+        </p>
       </main>
     );
   }
@@ -64,12 +94,31 @@ export default function HomePage() {
       {/* HEADER */}
       <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 border-b border-zinc-800 bg-black">
         <h1 className="text-2xl font-bold tracking-wide">
-          Catstagram 🐱
+          Miawgram 🐱
         </h1>
 
-        <div className="flex gap-4">
+        <div className="flex items-center gap-4">
+          {/* RECARGAR FEED */}
+          <button
+            onClick={generatePosts}
+            className="hover:scale-110 transition"
+            title="Recargar feed"
+          >
+            <RefreshCw className="w-6 h-6" />
+          </button>
+
+          {/* ICONOS */}
           <Heart className="w-6 h-6 cursor-pointer" />
           <Send className="w-6 h-6 cursor-pointer" />
+
+          {/* CERRAR SESIÓN */}
+          <button
+            onClick={handleLogout}
+            className="hover:scale-110 transition text-red-500"
+            title="Cerrar sesión"
+          >
+            <LogOut className="w-6 h-6" />
+          </button>
         </div>
       </header>
 
@@ -94,8 +143,13 @@ export default function HomePage() {
               </div>
 
               <div>
-                <p className="font-semibold">gato_{post.id}</p>
-                <p className="text-xs text-zinc-400">Medellín, Colombia</p>
+                <p className="font-semibold">
+                  gato_{post.id.slice(-4)}
+                </p>
+
+                <p className="text-xs text-zinc-400">
+                  Medellín, Colombia
+                </p>
               </div>
             </div>
 
@@ -114,7 +168,9 @@ export default function HomePage() {
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex gap-4">
                 <Heart className="w-7 h-7 cursor-pointer hover:scale-110 transition" />
+
                 <MessageCircle className="w-7 h-7 cursor-pointer hover:scale-110 transition" />
+
                 <Send className="w-7 h-7 cursor-pointer hover:scale-110 transition" />
               </div>
 
@@ -129,8 +185,9 @@ export default function HomePage() {
 
               <p className="text-sm">
                 <span className="font-semibold mr-2">
-                  gato_{post.id}
+                  gato_{post.id.slice(-4)}
                 </span>
+
                 {post.description}
               </p>
             </div>
